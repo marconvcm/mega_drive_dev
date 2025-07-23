@@ -10,8 +10,8 @@ It serves as a boilerplate for developing games on the Mega Drive platform.
 </p>
 
 <p align="center">
-  <img src=".github/trimui.png" alt="Running on my TrimUI">
-  <em>Running on my TrimUI</em>
+  <img src=".github/trimui.png" alt="Running on my TrimUI Brick">
+  <em>Running on my TrimUI Brick</em>
 </p>
 
 ## Features

@@ -9,6 +9,11 @@ It serves as a boilerplate for developing games on the Mega Drive platform.
   <em>Running on OpenEmu using CRT Shader</em>
 </p>
 
+<p align="center">
+  <img src=".github/trimui.png" alt="Running on my TrimUI">
+  <em>Running on my TrimUI</em>
+</p>
+
 ## Features
 - Simple Pong game mechanics
 - Basic graphics rendering

@@ -4,9 +4,10 @@ Please refer [SGDK](https://github.com/Stephane-D/SGDK) (Sega Genesis Developmen
 This is a simple Pong game for the Sega Mega Drive, demonstrating basic graphics and input handling.
 It serves as a boilerplate for developing games on the Mega Drive platform.
 
-![screenshot](.github/screenshot.png "Screenshot of the game in action")
-
-
+<p align="center">
+  <img src=".github/screenshot.png" alt="Screenshot of the game in action">
+  <em>Running on OpenEmu using CRT Shader</em>
+</p>
 
 ## Features
 - Simple Pong game mechanics

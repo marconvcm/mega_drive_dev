@@ -19,6 +19,13 @@ It serves as a boilerplate for developing games on the Mega Drive platform.
 - Docker for building the project
 - Sega Mega Drive emulator for testing
 
+## Installation
+To get started, clone the repository and remove the `.git` directory to start fresh with your own version control:
+```bash
+git clone https://github.com/marconvcm/mega_drive_dev.git
+cd mega_drive_dev && rm -rf .git
+```
+
 ## Building the Project
 To build the project, run the following command in the terminal:
 ```bash

@@ -1,8 +1,12 @@
+Please refer [SGDK](https://github.com/Stephane-D/SGDK) (Sega Genesis Development Kit) for more information about the development kit used in this project.
+
 # Mega Drive - Hello Pong - Boilerplate
 This is a simple Pong game for the Sega Mega Drive, demonstrating basic graphics and input handling.
 It serves as a boilerplate for developing games on the Mega Drive platform.
 
 ![screenshot](.github/screenshot.png "Screenshot of the game in action")
+
+
 
 ## Features
 - Simple Pong game mechanics

@@ -1,0 +1,62 @@
+name: Build Mega Drive ROM
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Create build directory
+      run: mkdir -p out
+      
+    - name: Build ROM with SGDK Docker
+      run: |
+        docker run --rm -v $PWD:/m68k -t registry.gitlab.com/doragasu/docker-sgdk:v2.00
+        
+    - name: Check if ROM was built
+      run: |
+        if [ -f "out/rom.bin" ]; then
+          echo "✅ ROM built successfully"
+          ls -la out/rom.bin
+        else
+          echo "❌ ROM build failed - rom.bin not found"
+          exit 1
+        fi
+        
+    - name: Rename ROM to game.md
+      run: |
+        if [ -f "out/rom.bin" ]; then
+          mv out/rom.bin game.md
+          echo "✅ ROM renamed to game.md"
+          ls -la game.md
+        fi
+        
+    - name: Upload ROM artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: mega-drive-rom
+        path: game.md
+        retention-days: 30
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts
+        path: |
+          out/
+          *.bin
+          *.elf
+          *.out
+        retention-days: 7
+        if-no-files-found: ignore

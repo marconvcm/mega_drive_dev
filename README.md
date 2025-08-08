@@ -31,6 +31,21 @@ git clone https://github.com/marconvcm/mega_drive_dev.git
 cd mega_drive_dev && rm -rf .git
 ```
 
+## Setup local library
+To enable IntelliSense in your IDE, you can download the SGDK headers using the following script:
+```sh
+#!/bin/bash
+# Download SGDK headers for IntelliSense
+SGDK_DIR=".sgdk"
+mkdir -p "${SGDK_DIR}/inc"
+
+curl -L https://github.com/Stephane-D/SGDK/archive/refs/heads/master.zip -o sgdk.zip
+unzip -j sgdk.zip "SGDK-master/inc/*" -d "${SGDK_DIR}/inc"
+rm sgdk.zip
+
+echo "SGDK headers downloaded to ${SGDK_DIR}/inc"
+```
+
 ## Building the Project
 To build the project, run the following command in the terminal:
 ```bash

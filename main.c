@@ -13,7 +13,15 @@
 #define COLOR_BLACK 0
 #define COLOR_WHITE 15
 
+// Game states
+typedef enum
+{
+   GAME_STATE_TITLE,
+   GAME_STATE_PLAYING
+} GameState;
+
 // Game variables
+GameState current_state = GAME_STATE_TITLE;
 typedef struct
 {
    s16 x, y;
@@ -32,26 +40,24 @@ char score_text[20];
 
 // Tile data for solid rectangles
 static const u32 solid_tile[8] = {
-   0xFFFFFFFF,
-   0xFFFFFFFF,
-   0xFFFFFFFF,
-   0xFFFFFFFF,
-   0xFFFFFFFF,
-   0xFFFFFFFF,
-   0xFFFFFFFF,
-   0xFFFFFFFF
-};
+    0xFFFFFFFF,
+    0xFFFFFFFF,
+    0xFFFFFFFF,
+    0xFFFFFFFF,
+    0xFFFFFFFF,
+    0xFFFFFFFF,
+    0xFFFFFFFF,
+    0xFFFFFFFF};
 
 static const u32 empty_tile[8] = {
-   0x00000000, 
-   0x00000000, 
-   0x00000000, 
-   0x00000000,
-   0x00000000, 
-   0x00000000, 
-   0x00000000, 
-   0x00000000
-};
+    0x00000000,
+    0x00000000,
+    0x00000000,
+    0x00000000,
+    0x00000000,
+    0x00000000,
+    0x00000000,
+    0x00000000};
 
 // Function prototypes
 void init_game();
@@ -63,20 +69,12 @@ void draw_filled_rect(s16 x, s16 y, s16 width, s16 height, u16 color);
 void draw_paddle(s16 x, s16 y, u16 color);
 void draw_ball_rect(s16 x, s16 y, u16 color);
 void draw_center_line();
+void show_title_screen();
+void update_title_screen();
+void clear_screen();
 
 void init_game()
 {
-   // Set up video mode
-   VDP_setScreenWidth320();
-
-   // Set up color palette - simple black and white
-   VDP_setPaletteColor(0, RGB24_TO_VDPCOLOR(0x000000));  // Black
-   VDP_setPaletteColor(15, RGB24_TO_VDPCOLOR(0xFFFFFF)); // White
-
-   // Load our tile graphics into VRAM
-   VDP_loadTileData(solid_tile, 1, 1, 0); // Tile index 1 = solid white
-   VDP_loadTileData(empty_tile, 2, 1, 0); // Tile index 2 = empty/black
-
    // Initialize paddles
    player1.x = 16;
    player1.y = SCREEN_HEIGHT / 2 - PADDLE_HEIGHT / 2;
@@ -84,11 +82,12 @@ void init_game()
    player2.x = SCREEN_WIDTH - 24;
    player2.y = SCREEN_HEIGHT / 2 - PADDLE_HEIGHT / 2;
 
+   // Reset scores
+   score_p1 = 0;
+   score_p2 = 0;
+
    // Initialize ball
    reset_ball();
-
-   // Set background color to black
-   VDP_setBackgroundColor(COLOR_BLACK);
 }
 
 void reset_ball()
@@ -147,6 +146,14 @@ void update_paddles()
    u16 joy1 = JOY_readJoypad(JOY_1);
    u16 joy2 = JOY_readJoypad(JOY_2);
 
+   // Check for SELECT button to return to title screen
+   if (joy1 & BUTTON_C)
+   {
+      current_state = GAME_STATE_TITLE;
+      show_title_screen();
+      return;
+   }
+
    // Clear old paddle positions
    draw_paddle(player1.x, player1.y, COLOR_BLACK);
    draw_paddle(player2.x, player2.y, COLOR_BLACK);
@@ -194,7 +201,7 @@ void update_ball()
 
    const s16 SCREEN_HEIGHT_LIMIT = SCREEN_HEIGHT - BALL_SIZE - 3;
    const s16 SCREEN_TOP_LIMIT = 3;
-   
+
    // Update ball position
    ball.x += ball.vel_x;
    ball.y += ball.vel_y;
@@ -265,25 +272,99 @@ void draw_game()
 
    // Draw controls info
    VDP_drawText("UP/DOWN    -    A/B", 8, 26);
+   VDP_drawText("C: Title Screen", 11, 27);
 
    VDP_drawText("HELLO PONG", 1, 1);
+}
+
+void clear_screen()
+{
+   // Clear the entire screen by filling it with empty tiles
+   for (s16 y = 0; y < 28; y++)
+   {
+      for (s16 x = 0; x < 40; x++)
+      {
+         VDP_setTileMapXY(BG_B, TILE_ATTR_FULL(PAL0, 0, 0, 0, 2), x, y);
+      }
+   }
+
+   // Clear text plane A as well
+   VDP_clearPlane(BG_A, TRUE);
+}
+
+void show_title_screen()
+{
+   clear_screen();
+
+   // Draw title
+   VDP_drawText("      MEGA DRIVE PONG      ", 7, 8);
+   VDP_drawText("      ==============      ", 7, 9);
+
+   // Draw instructions
+   VDP_drawText("    Press START to Play    ", 7, 14);
+   VDP_drawText("                           ", 7, 15);
+   VDP_drawText("  Player 1: UP/DOWN        ", 7, 17);
+   VDP_drawText("  Player 2: A/B or 2P pad  ", 7, 18);
+
+   // Draw some decorative elements
+   VDP_drawText("* * * * * * * * * * * * * *", 3, 5);
+   VDP_drawText("* * * * * * * * * * * * * *", 3, 22);
+
+   // Credits
+   VDP_drawText("     A Retro Game Demo     ", 7, 25);
+}
+
+void update_title_screen()
+{
+   u16 joy1 = JOY_readJoypad(JOY_1);
+   u16 joy2 = JOY_readJoypad(JOY_2);
+
+   // Check for START button on either controller
+   if ((joy1 & BUTTON_START) || (joy2 & BUTTON_START))
+   {
+      current_state = GAME_STATE_PLAYING;
+      clear_screen();
+      init_game();
+   }
 }
 
 int main(bool hard_reset)
 {
    VDP_init();
 
-   // Initialize game
-   init_game();
+   // Set up video mode and basic graphics
+   VDP_setScreenWidth320();
+
+   // Set up color palette - simple black and white
+   VDP_setPaletteColor(0, RGB24_TO_VDPCOLOR(0x000000));  // Black
+   VDP_setPaletteColor(15, RGB24_TO_VDPCOLOR(0xFFFFFF)); // White
+
+   // Load our tile graphics into VRAM
+   VDP_loadTileData(solid_tile, 1, 1, 0); // Tile index 1 = solid white
+   VDP_loadTileData(empty_tile, 2, 1, 0); // Tile index 2 = empty/black
+
+   // Set background color to black
+   VDP_setBackgroundColor(COLOR_BLACK);
+
+   // Start with title screen
+   current_state = GAME_STATE_TITLE;
+   show_title_screen();
 
    while (TRUE)
    {
-      // Update game logic
-      update_paddles();
-      update_ball();
+      if (current_state == GAME_STATE_TITLE)
+      {
+         update_title_screen();
+      }
+      else if (current_state == GAME_STATE_PLAYING)
+      {
+         // Update game logic
+         update_paddles();
+         update_ball();
 
-      // Draw everything
-      draw_game();
+         // Draw everything
+         draw_game();
+      }
 
       // Wait for VBlank
       SYS_doVBlankProcess();
